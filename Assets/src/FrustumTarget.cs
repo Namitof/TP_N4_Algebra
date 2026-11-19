@@ -1,71 +1,86 @@
 using UnityEngine;
 
-namespace ReyesCuadra
+// Objeto 3D que se chequea con el frustum.
+// Si AL MENOS UNO de sus vértices está adentro, se pinta de verde y avisa por consola.
+[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))] //Requiere mesh
+public class FrustumTarget : MonoBehaviour
 {
-    // Objeto 3D que se chequea contra el frustum.
-    // Si AL MENOS UNO de sus vértices está adentro, se pinta de verde y avisa por consola.
-    [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-    public class FrustumTarget : MonoBehaviour
+    [SerializeField] private FrustumCamera frustumCamera;
+    [SerializeField] private Color insideFrustumColor = Color.green;
+    [SerializeField] private Color outsideFrustumColor = Color.red;
+
+    private Vector3[] localVertices;
+    private MeshRenderer meshRenderer;
+    private bool hasBeenCheckedOnce;
+    private bool IsInsideFrustum;
+
+    private void Start()
     {
-        [SerializeField] private Color insideFrustumColor = Color.green;
-        [SerializeField] private Color outsideFrustumColor = Color.red;
+        meshRenderer = GetComponent<MeshRenderer>();
 
-        private FrustumCamera frustumCamera;
-        private Vector3[] localVertices;
-        private MeshRenderer meshRenderer;
-        private bool hasBeenCheckedOnce;
+        //Los vértices del mesh vienen en espacio LOCAL del objeto
+        localVertices = GetComponent<MeshFilter>().sharedMesh.vertices;
 
-        // Estado actual, lo lee el HUD para mostrarlo en pantalla
-        public bool IsInsideFrustum { get; private set; }
+        if (frustumCamera == null)
+            Debug.Log("No hay ninguna FrustumCamera");
+    }
 
-        private void Start()
+    private void Update()
+    {
+        if (frustumCamera == null)
+            return;
+
+        bool isAnyVertexInside = false;
+
+        foreach (Vector3 localVertex in localVertices)
         {
-            frustumCamera = FindFirstObjectByType<FrustumCamera>();
-            meshRenderer = GetComponent<MeshRenderer>();
+            // Pasamos el vértice de espacio local a espacio de mundo
+            // (aplica la posición, rotación y escala del objeto)
+            Vector3 worldVertex = transform.TransformPoint(localVertex);
 
-            // Los vértices del mesh vienen en espacio LOCAL del objeto
-            localVertices = GetComponent<MeshFilter>().sharedMesh.vertices;
-
-            if (frustumCamera == null)
-                Debug.LogWarning($"[{name}] No hay ninguna FrustumCamera en la escena.");
-        }
-
-        private void Update()
-        {
-            if (frustumCamera == null)
-                return;
-
-            bool isAnyVertexInside = false;
-
-            foreach (Vector3 localVertex in localVertices)
+            if (frustumCamera.IsPointInsideFrustum(worldVertex))
             {
-                // Pasamos el vértice de espacio local a espacio de mundo
-                // (aplica la posición, rotación y escala del objeto)
-                Vector3 worldVertex = transform.TransformPoint(localVertex);
-
-                if (frustumCamera.IsPointInsideFrustum(worldVertex))
-                {
-                    isAnyVertexInside = true;
-                    break; // con uno solo alcanza, no hace falta seguir revisando
-                }
-            }
-
-            // Solo actualizamos color y avisamos cuando el estado cambia
-            if (isAnyVertexInside != IsInsideFrustum || !hasBeenCheckedOnce)
-            {
-                IsInsideFrustum = isAnyVertexInside;
-                hasBeenCheckedOnce = true;
-                NotifyStateChange();
+                isAnyVertexInside = true;
+                break; // con uno solo alcanza, no hace falta seguir revisando
             }
         }
 
-        private void NotifyStateChange()
+        //Actualizamos color y avisamos cuando el estado cambia
+        if (isAnyVertexInside != IsInsideFrustum || !hasBeenCheckedOnce)
         {
-            // renderer.material crea una copia del material solo para este objeto
-            meshRenderer.material.color = IsInsideFrustum ? insideFrustumColor : outsideFrustumColor;
+            IsInsideFrustum = isAnyVertexInside;
+            hasBeenCheckedOnce = true;
+            NotifyStateChange();
+        }
+    }
 
-            string stateText = IsInsideFrustum ? "ENTRÓ al frustum" : "SALIÓ del frustum";
-            Debug.Log($"[{name}] {stateText}");
+    private void NotifyStateChange()
+    {
+        //MeshRenderer
+        //Se encarga de renderizar (dibujar) el modelo en pantalla.
+        //Controla aspectos como:
+        //  -Materiales.
+        //  - Sombras.
+        //  - Iluminación.
+        //  - Visibilidad del renderizado.
+
+        //Cambia el color del objeto dependiendo de si está dentro o fuera del frustum.
+        meshRenderer.material.color = IsInsideFrustum ? insideFrustumColor : outsideFrustumColor;
+
+        // OCULTAR EL MODELO
+        //if (!IsInsideFrustum)
+        //    meshRenderer.enabled = false;
+        //else
+        //    meshRenderer.enabled = true;
+
+        if (IsInsideFrustum)
+        {
+            Debug.Log($"[ADENTRO] {gameObject.name}");
+        }
+        else
+        {
+            Debug.Log($"[AFUERA] {gameObject.name}");
         }
     }
 }
+
