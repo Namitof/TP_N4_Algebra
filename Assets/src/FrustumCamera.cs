@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// https://learnopengl.com/Guest-Articles/2021/Scene/Frustum-Culling
 // Datos de entrada del frustum (FOV, aspect ratio y distancia de renderizado) 
 // Chequea si un punto está adentro o no.
 [RequireComponent(typeof(Camera))] //Requiere una camara
