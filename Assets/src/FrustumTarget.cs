@@ -11,7 +11,7 @@ public class FrustumTarget : MonoBehaviour
 
     private Vector3[] localVertices;
     private MeshRenderer meshRenderer;
-    private bool hasBeenCheckedOnce;
+    private bool hasBeenCheckedOnce = false;
     private bool IsInsideFrustum;
 
     private void Start()
@@ -34,14 +34,14 @@ public class FrustumTarget : MonoBehaviour
 
         foreach (Vector3 localVertex in localVertices)
         {
-            // Pasamos el vértice de espacio local a espacio de mundo
-            // (aplica la posición, rotación y escala del objeto)
+            //Pasamos el vértice de espacio local a espacio de mundo
+            //(aplica la posición, rotación y escala del objeto)
             Vector3 worldVertex = transform.TransformPoint(localVertex);
 
             if (frustumCamera.IsPointInsideFrustum(worldVertex))
             {
                 isAnyVertexInside = true;
-                break; // con uno solo alcanza, no hace falta seguir revisando
+                break; //con uno solo alcanza, no hace falta seguir revisando
             }
         }
 
@@ -59,7 +59,7 @@ public class FrustumTarget : MonoBehaviour
         //MeshRenderer
         //Se encarga de renderizar (dibujar) el modelo en pantalla.
         //Controla aspectos como:
-        //  -Materiales.
+        //  - Materiales.
         //  - Sombras.
         //  - Iluminación.
         //  - Visibilidad del renderizado.

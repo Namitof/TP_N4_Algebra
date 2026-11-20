@@ -41,24 +41,6 @@ public class FrustumCamera : MonoBehaviour
         CalculateFrustumPlanes();
     }
 
-    private void OnValidate()
-    {
-        // Se llama cuando cambiás un valor en el Inspector: mantenemos todo sincronizado
-        if (nearPlaneDistance < 0.01f)
-            nearPlaneDistance = 0.01f;
-
-        if (renderDistance < nearPlaneDistance + 0.1f)
-            renderDistance = nearPlaneDistance + 0.1f;
-
-        if (aspectRatio < 0.1f)
-            aspectRatio = 0.1f;
-
-        if (unityCamera == null)
-            unityCamera = GetComponent<Camera>();
-
-        ApplySettingsToUnityCamera();
-    }
-
     private void Update()
     {
         CalculateFrustumPlanes();
