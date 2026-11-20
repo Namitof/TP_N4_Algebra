@@ -7,7 +7,7 @@ using UnityEngine;
 public class FrustumCamera : MonoBehaviour
 {
     [Header("Datos del frustum")]
-    [Tooltip("Campo de visión VERTICAL en grados")]
+    [Tooltip("Campo de visión HORIZONTAL en grados")]
     [Range(10f, 170f)]
     [SerializeField] private float fieldOfViewDegrees = 60f; //Fov
 
@@ -25,7 +25,7 @@ public class FrustumCamera : MonoBehaviour
 
     private Camera unityCamera;
 
-    //Planos del frustrum
+    //Planos del frustum
     private struct Plane
     {
         public Vector3 normal;
@@ -83,7 +83,7 @@ public class FrustumCamera : MonoBehaviour
     // Orden: arriba-izquierda, arriba-derecha, abajo-derecha, abajo-izquierda.
     private Vector3[] GetFrustumCornersAtDistance(float distanceFromCamera)
     {
-        //Pasar de grados a radianes X Grados * PI/180
+        //Pasar de grados a radianes X Grados * PI/180 Grados
         float halfFieldOfViewRadians = fieldOfViewDegrees * 0.5f * Mathf.Deg2Rad; 
 
         //Mitad del alto del rectángulo: tan(FOV/2) = mitadAlto / distancia //Trigonometria -> SOHCAHTOA
